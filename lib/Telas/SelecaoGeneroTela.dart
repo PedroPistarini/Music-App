@@ -37,9 +37,9 @@ class _SelecaoGeneroTelaState extends State<SelecaoGeneroTela> {
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text("Deslogar"),
-              onTap: () {
-                AutenticacaoServico().deslogar();
-                Navigator.of(context).pop();
+              onTap: () async {
+                await AutenticacaoServico().deslogar();
+                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
               },
             ),
           ],
@@ -146,9 +146,9 @@ class _SelecaoGeneroTelaState extends State<SelecaoGeneroTela> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Fecha o popup
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => Playlisttela()), // Direto para a PlaylistTela
-                );
+                Navigator.of(context).pushNamed('/playlist');
+                  //MaterialPageRoute(builder: (context) => const Playlisttela()), // Direto para a PlaylistTela
+                //);
               },
               child: const Text('Sim'),
             ),

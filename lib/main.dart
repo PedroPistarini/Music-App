@@ -4,14 +4,11 @@ import 'package:flutter_application_1/Telas/PlaylistTela.dart';
 import 'package:flutter_application_1/Telas/autentificacaotela.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/Telas/selecaogenerotela.dart';
-//import 'package:flutter_application_1/firabase_option.dart';
 import 'firebase_options.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
@@ -27,8 +24,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RoteadorTela(),
+    return MaterialApp(
+      title: 'Meu App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const RoteadorTela(),
+      routes: {
+        '/playlist': (context) => const Playlisttela(),
+        '/selecaogenero': (context) => const SelecaoGeneroTela(),
+      },
     );
   }
 }
@@ -38,7 +43,6 @@ class RoteadorTela extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.userChanges(),
       builder: (context, snapshot) {
@@ -60,5 +64,5 @@ class RoteadorTela extends StatelessWidget {
         }
       },
     );
-  } 
+  }
 }

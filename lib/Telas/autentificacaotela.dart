@@ -200,7 +200,7 @@ class _AutentificacaoTelaState extends State<AutentificacaoTela> {
     if (queroEntrar) {
       // Lógica de login
       print("Entrada Validada");
-      _autenServico.LogarUsuario(email: email, senha: senha).then(
+      _autenServico.logarUsuario(email: email, senha: senha).then(
         (String? erro) {
           if (erro != null) {
             showSnackBar(context: context, texto: erro);
