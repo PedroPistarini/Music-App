@@ -24,8 +24,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RoteadorTela(),
+    return MaterialApp(
+      title: 'Meu App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const RoteadorTela(),
+      routes: {
+        '/playlist': (context) => const Playlisttela(),
+        '/selecaogenero': (context) => const SelecaoGeneroTela(),
+      },
     );
   }
 }
@@ -42,7 +50,7 @@ class RoteadorTela extends StatelessWidget {
           // Verifica se o usuário acabou de se cadastrar
           if (isSignup) {
             isSignup = false; // Resetando a flag
-            return const Selecaogenerotela(); // Redireciona para a tela de gênero
+            return const SelecaoGeneroTela(); // Redireciona para a tela de gênero
           } else {
             return const Playlisttela(); // Redireciona para a tela da playlist
           }

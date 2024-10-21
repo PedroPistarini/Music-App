@@ -15,8 +15,9 @@ class Playlisttela extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text("Deslogar"),
-              onTap: () {
-                AutenticacaoServico().deslogar();
+              onTap: () async {
+                await AutenticacaoServico().deslogar();
+                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
               },
             ),
           ],
@@ -30,7 +31,7 @@ class Playlisttela extends StatelessWidget {
               onPressed: () => _criarPlaylist(context),
               child: const Text('Criar Playlist'),
             ),
-            Expanded(child: _exibirPlaylists(context)), // Passe o contexto aqui
+            Expanded(child: _exibirPlaylists(context)),
           ],
         ),
       ),
@@ -79,8 +80,6 @@ class Playlisttela extends StatelessWidget {
       'musicas': [],
       'createdAt': FieldValue.serverTimestamp(),
     });
-
-    print('Playlist "$nomePlaylist" criada com sucesso!');
   }
 
   StreamBuilder<QuerySnapshot> _exibirPlaylists(BuildContext context) {
@@ -98,25 +97,23 @@ class Playlisttela extends StatelessWidget {
 
         return ListView(
           children: playlists.map((playlist) {
-            final playlistId = playlist.id; // Obtenha o ID da playlist
+            final playlistId = playlist.id;
 
             return ListTile(
               title: Text(playlist['nome']),
               trailing: Row(
-                mainAxisSize: MainAxisSize.min, // Para não expandir a linha
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.remove_circle_outline),
                     onPressed: () {
-                      // Chame a função para remover a playlist
                       _removerPlaylist(playlistId, context);
                     },
                   ),
                   IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () {
-                      // Chamada de função para colocar música
-                      // Você pode criar uma função para abrir um diálogo para adicionar músicas
+                      // Adicionar música (implementar função)
                     },
                   ),
                 ],
@@ -133,17 +130,12 @@ class Playlisttela extends StatelessWidget {
 
     await firestore.collection('playlists').doc(playlistId).delete();
 
-    // Exibir o SnackBar
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Playlist removida com sucesso!'),
-        duration: Duration(seconds: 2), // Duração do SnackBar
+        duration: Duration(seconds: 2),
         backgroundColor: Colors.green,
       ),
     );
-  
-    print('Playlist removida com sucesso!');
   }
-
-  
 }
