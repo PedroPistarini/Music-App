@@ -4,11 +4,14 @@ import 'package:flutter_application_1/Telas/PlaylistTela.dart';
 import 'package:flutter_application_1/Telas/autentificacaotela.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/Telas/selecaogenerotela.dart';
+//import 'package:flutter_application_1/firabase_option.dart';
 import 'firebase_options.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
+
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
@@ -35,6 +38,7 @@ class RoteadorTela extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.userChanges(),
       builder: (context, snapshot) {
@@ -42,7 +46,7 @@ class RoteadorTela extends StatelessWidget {
           // Verifica se o usuário acabou de se cadastrar
           if (isSignup) {
             isSignup = false; // Resetando a flag
-            return const Selecaogenerotela(); // Redireciona para a tela de gênero
+            return const SelecaoGeneroTela(); // Redireciona para a tela de gênero
           } else {
             return const Playlisttela(); // Redireciona para a tela da playlist
           }
@@ -56,5 +60,5 @@ class RoteadorTela extends StatelessWidget {
         }
       },
     );
-  }
+  } 
 }
