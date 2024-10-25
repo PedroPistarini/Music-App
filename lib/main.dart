@@ -50,7 +50,7 @@ class RoteadorTela extends StatelessWidget {
           // Verifica se o usuário acabou de se cadastrar
           if (isSignup) {
             isSignup = false; // Resetando a flag
-            return const SelecaoGeneroTela(); // Redireciona para a tela de gênero
+            return const SelecaoGeneroTela(); // Redireciona para a tela de gênero                   // Lembrar de alterar, por que tem algum problema nessa parte de troca de telas.
           } else {
             return const Playlisttela(); // Redireciona para a tela da playlist
           }

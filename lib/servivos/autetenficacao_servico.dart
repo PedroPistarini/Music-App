@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AutenticacaoServico {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
+  
   // Cadastro do usuário.
   Future<String?> cadastrarUsuario({
     required String email,
@@ -17,6 +17,8 @@ class AutenticacaoServico {
       );
       
       await userCredential.user!.updateDisplayName(nome);
+      userCredential.user!.sendEmailVerification();
+
       return null;
     } on FirebaseAuthException catch (e) {
       if (e.code == "email-already-in-use") {

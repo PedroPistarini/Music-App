@@ -1,6 +1,6 @@
 // lib/telas/selecao_genero_tela.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/Telas/PlaylistTela.dart';
+//import 'package:flutter_application_1/Telas/PlaylistTela.dart';
 import 'package:flutter_application_1/servivos/autetenficacao_servico.dart';
 import 'package:flutter_application_1/servivos/genero_servico.dart';
 
