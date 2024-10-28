@@ -7,18 +7,14 @@ class PlaylistService {
 
   // Método para criar uma nova playlist
   Future<void> criarPlaylist(String nomePlaylist) async {
-    User? usuario = _auth.currentUser; // Obtendo o usuário autenticado
+    User? usuario = _auth.currentUser;
 
     if (usuario != null) {
-      // Criando a nova playlist no Firestore
-      await _firestore
-          .collection('playlists')
-          .doc(usuario.uid) // Usando o ID do usuário como documento
-          .collection('userPlaylists')
-          .add({
+      await _firestore.collection('playlists').add({
         'name': nomePlaylist,
-        'songs': [], // Inicializa com um array vazio
-        'createdAt': Timestamp.now(), // Data de criação
+        'userId': usuario.uid,
+        'songs': [],
+        'createdAt': Timestamp.now(),
       });
     }
   }
@@ -30,14 +26,37 @@ class PlaylistService {
     if (usuario != null) {
       QuerySnapshot querySnapshot = await _firestore
           .collection('playlists')
-          .doc(usuario.uid)
-          .collection('userPlaylists')
+          .where('userId', isEqualTo: usuario.uid)
           .get();
 
-      // Transformar os dados em uma lista de mapas
-      return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {
+          'id': doc.id,
+          'name': data['name'] ?? 'Sem Nome',
+          'songs': data['songs'] ?? []
+        };
+      }).toList();
     }
-    
+
     return [];
+  }
+
+  // Método para adicionar uma música à playlist específica
+  Future<void> adicionarMusicaAPlaylist(String playlistId, Map<String, dynamic> musica) async {
+    User? usuario = _auth.currentUser;
+
+    if (usuario != null) {
+      DocumentReference playlistRef = _firestore.collection('playlists').doc(playlistId);
+
+      await playlistRef.update({
+        'songs': FieldValue.arrayUnion([musica]),
+      });
+    }
+  }
+
+  // Método para remover uma playlist
+  Future<void> removerPlaylist(String playlistId) async {
+    await _firestore.collection('playlists').doc(playlistId).delete();
   }
 }

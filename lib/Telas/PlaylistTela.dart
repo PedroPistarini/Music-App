@@ -1,9 +1,64 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/Telas/detalhesplaylisttela.dart';
+import 'package:flutter_application_1/Telas/musicatela.dart';
 import 'package:flutter_application_1/servivos/autetenficacao_servico.dart';
+import 'package:flutter_application_1/servivos/playlist_servico.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Playlisttela extends StatelessWidget {
-  const Playlisttela({super.key});
+class PlaylistTela extends StatefulWidget {
+  const PlaylistTela({Key? key}) : super(key: key);
+
+  @override
+  _PlaylistTelaState createState() => _PlaylistTelaState();
+}
+
+class _PlaylistTelaState extends State<PlaylistTela> {
+  final AutenticacaoServico _authService = AutenticacaoServico();
+  String? topArtista;
+  String? topMusica;
+
+  @override
+  void initState() {
+    super.initState();
+    _calcularTopArtistaEMusica();
+  }
+
+  Future<void> _calcularTopArtistaEMusica() async {
+    final userId = _authService.getUserId();
+    if (userId.isEmpty) {
+      print("Usuário não autenticado");
+      return;
+    }
+
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('playlists')
+        .where('userId', isEqualTo: userId)
+        .get();
+
+    final Map<String, int> artistasContagem = {};
+    final Map<String, int> musicasContagem = {};
+
+    for (var doc in snapshot.docs) {
+      final List<dynamic> musicas = doc['songs'] ?? [];
+
+      for (var musica in musicas) {
+        final artista = musica['artist'] ?? 'Desconhecido';
+        final nomeMusica = musica['name'] ?? 'Sem título';
+
+        artistasContagem[artista] = (artistasContagem[artista] ?? 0) + 1;
+        musicasContagem[nomeMusica] = (musicasContagem[nomeMusica] ?? 0) + 1;
+      }
+    }
+
+    setState(() {
+      topArtista = artistasContagem.entries
+          .reduce((a, b) => a.value > b.value ? a : b)
+          .key;
+      topMusica = musicasContagem.entries
+          .reduce((a, b) => a.value > b.value ? a : b)
+          .key;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +68,18 @@ class Playlisttela extends StatelessWidget {
         child: ListView(
           children: [
             ListTile(
+              leading: const Icon(Icons.music_note),
+              title: const Text("Músicas"),
+              onTap: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const Musicatela()));
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.logout),
               title: const Text("Deslogar"),
               onTap: () async {
-                await AutenticacaoServico().deslogar();
+                await _authService.deslogar();
                 Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
               },
             ),
@@ -32,6 +95,8 @@ class Playlisttela extends StatelessWidget {
               child: const Text('Criar Playlist'),
             ),
             Expanded(child: _exibirPlaylists(context)),
+            const Divider(),
+            _exibirTopArtistaEMusica(),
           ],
         ),
       ),
@@ -53,7 +118,7 @@ class Playlisttela extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                _salvarPlaylist(nomePlaylistController.text);
+                PlaylistService().criarPlaylist(nomePlaylistController.text);
                 Navigator.of(context).pop();
               },
               child: const Text('Salvar'),
@@ -70,20 +135,8 @@ class Playlisttela extends StatelessWidget {
     );
   }
 
-  Future<void> _salvarPlaylist(String nomePlaylist) async {
-    final firestore = FirebaseFirestore.instance;
-    final userId = AutenticacaoServico().getUserId();
-
-    await firestore.collection('playlists').add({
-      'nome': nomePlaylist,
-      'userId': userId,
-      'musicas': [],
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-  }
-
   StreamBuilder<QuerySnapshot> _exibirPlaylists(BuildContext context) {
-    final userId = AutenticacaoServico().getUserId();
+    final userId = _authService.getUserId();
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -98,9 +151,22 @@ class Playlisttela extends StatelessWidget {
         return ListView(
           children: playlists.map((playlist) {
             final playlistId = playlist.id;
+            final playlistName = playlist['name'] ?? 'Sem Nome';
 
             return ListTile(
-              title: Text(playlist['nome']),
+              title: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DetalhesPlaylistTela(
+                        playlistId: playlistId,
+                        playlistName: playlistName,
+                      ),
+                    ),
+                  );
+                },
+                child: Text(playlistName),
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -113,7 +179,11 @@ class Playlisttela extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () {
-                      // Adicionar música (implementar função)
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const Musicatela(),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -125,10 +195,52 @@ class Playlisttela extends StatelessWidget {
     );
   }
 
-  Future<void> _removerPlaylist(String playlistId, BuildContext context) async {
-    final firestore = FirebaseFirestore.instance;
+  Widget _exibirTopArtistaEMusica() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      color: Colors.grey.shade200,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Seus Tops",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          if (topArtista != null)
+            _carrosselItem("Top Artista", topArtista!),
+          if (topMusica != null)
+            _carrosselItem("Top Música", topMusica!),
+        ],
+      ),
+    );
+  }
 
-    await firestore.collection('playlists').doc(playlistId).delete();
+  Widget _carrosselItem(String titulo, String valor) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              titulo,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              valor,
+              style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _removerPlaylist(String playlistId, BuildContext context) async {
+    await PlaylistService().removerPlaylist(playlistId);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
