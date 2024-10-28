@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Telas/PlaylistTela.dart';
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
       ),
       home: const RoteadorTela(),
       routes: {
-        '/playlist': (context) => const Playlisttela(),
+        '/playlist': (context) => const PlaylistTela(),
         '/selecaogenero': (context) => const SelecaoGeneroTela(),
       },
     );
@@ -52,7 +53,7 @@ class RoteadorTela extends StatelessWidget {
             isSignup = false; // Resetando a flag
             return const SelecaoGeneroTela(); // Redireciona para a tela de gênero                   // Lembrar de alterar, por que tem algum problema nessa parte de troca de telas.
           } else {
-            return const Playlisttela(); // Redireciona para a tela da playlist
+            return const PlaylistTela(); // Redireciona para a tela da playlist
           }
         } else {
           return AutentificacaoTela(
