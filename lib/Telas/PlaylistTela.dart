@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Telas/detalhesplaylisttela.dart';
 import 'package:flutter_application_1/Telas/musicatela.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/servivos/autetenficacao_servico.dart';
 import 'package:flutter_application_1/servivos/playlist_servico.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PlaylistTela extends StatefulWidget {
   const PlaylistTela({Key? key}) : super(key: key);
@@ -20,10 +20,10 @@ class _PlaylistTelaState extends State<PlaylistTela> {
   @override
   void initState() {
     super.initState();
-    _calcularTopArtistaEMusica();
+    _carregarTopArtistaEMusica();
   }
 
-  Future<void> _calcularTopArtistaEMusica() async {
+  Future<void> _carregarTopArtistaEMusica() async {
     final userId = _authService.getUserId();
     if (userId.isEmpty) {
       print("Usuário não autenticado");
@@ -51,12 +51,12 @@ class _PlaylistTelaState extends State<PlaylistTela> {
     }
 
     setState(() {
-      topArtista = artistasContagem.entries
-          .reduce((a, b) => a.value > b.value ? a : b)
-          .key;
-      topMusica = musicasContagem.entries
-          .reduce((a, b) => a.value > b.value ? a : b)
-          .key;
+      topArtista = artistasContagem.entries.isNotEmpty
+          ? artistasContagem.entries.reduce((a, b) => a.value > b.value ? a : b).key
+          : null;
+      topMusica = musicasContagem.entries.isNotEmpty
+          ? musicasContagem.entries.reduce((a, b) => a.value > b.value ? a : b).key
+          : null;
     });
   }
 
