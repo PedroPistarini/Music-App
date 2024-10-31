@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Telas/PlaylistTela.dart';
@@ -19,7 +18,6 @@ void main() async {
 // Variável global para identificar se o usuário acabou de se cadastrar
 bool isSignup = false;
 
-// Chamada da tela inicial ( autentificador )
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -48,17 +46,15 @@ class RoteadorTela extends StatelessWidget {
       stream: FirebaseAuth.instance.userChanges(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          // Verifica se o usuário acabou de se cadastrar
           if (isSignup) {
-            isSignup = false; // Resetando a flag
-            return const SelecaoGeneroTela(); // Redireciona para a tela de gênero                   // Lembrar de alterar, por que tem algum problema nessa parte de troca de telas.
+            isSignup = false;
+            return const SelecaoGeneroTela();
           } else {
-            return const PlaylistTela(); // Redireciona para a tela da playlist
+            return const PlaylistTela();
           }
         } else {
           return AutentificacaoTela(
             onSignup: () {
-              // Callback que será chamada quando o usuário se cadastrar
               isSignup = true;
             },
           );
