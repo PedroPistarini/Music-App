@@ -14,6 +14,7 @@ class PlaylistTela extends StatefulWidget {
 
 class _PlaylistTelaState extends State<PlaylistTela> {
   final AutenticacaoServico _authService = AutenticacaoServico();
+  final PlaylistService _playlistService = PlaylistService();
   String? topArtista;
   String? topMusica;
 
@@ -21,8 +22,15 @@ class _PlaylistTelaState extends State<PlaylistTela> {
   void initState() {
     super.initState();
     _carregarTopArtistaEMusica();
+    _atualizarDailyMix(); // Atualiza o Daily Mix automaticamente ao abrir a tela
   }
 
+  Future<void> _atualizarDailyMix() async {
+    await PlaylistService().atualizarDailyMix();
+  }
+
+
+  // Método para carregar o artista e música mais tocados
   Future<void> _carregarTopArtistaEMusica() async {
     final userId = _authService.getUserId();
     if (userId.isEmpty) {
@@ -63,7 +71,20 @@ class _PlaylistTelaState extends State<PlaylistTela> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Biblioteca")),
+      appBar: AppBar(
+        title: const Text("Biblioteca"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () async {
+              await _atualizarDailyMix();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Daily Mix atualizado!')),
+              );
+            },
+          ),
+        ],
+      ),
       drawer: Drawer(
         child: ListView(
           children: [
@@ -118,7 +139,7 @@ class _PlaylistTelaState extends State<PlaylistTela> {
           actions: [
             TextButton(
               onPressed: () {
-                PlaylistService().criarPlaylist(nomePlaylistController.text);
+                _playlistService.criarPlaylist(nomePlaylistController.text);
                 Navigator.of(context).pop();
               },
               child: const Text('Salvar'),
@@ -240,7 +261,7 @@ class _PlaylistTelaState extends State<PlaylistTela> {
   }
 
   Future<void> _removerPlaylist(String playlistId, BuildContext context) async {
-    await PlaylistService().removerPlaylist(playlistId);
+    await _playlistService.removerPlaylist(playlistId);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class PlayerTela extends StatefulWidget {
@@ -32,6 +33,28 @@ class _PlayerTelaState extends State<PlayerTela> {
       setState(() {
         _currentIndex--;
       });
+    }
+  }
+
+  // Incrementa o playCount na coleção 'plays' para a música atual
+  Future<void> _incrementPlayCount() async {
+    final currentSong = widget.playlist[_currentIndex];
+    final String songId = currentSong['id'];
+
+    try {
+      // Referência para a música na coleção 'plays'
+      DocumentReference playRef = FirebaseFirestore.instance.collection('plays').doc(songId);
+
+      // Atualiza o playCount usando FieldValue.increment
+      await playRef.set({
+        'songData': currentSong,
+        'playCount': FieldValue.increment(1),
+      }, SetOptions(merge: true));
+      
+      print("Play count incrementado para ${currentSong['name']}");
+
+    } catch (error) {
+      print("Erro ao incrementar playCount: $error");
     }
   }
 
@@ -100,9 +123,11 @@ class _PlayerTelaState extends State<PlayerTela> {
                   onPressed: _previousSong,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.play_arrow), // Ícone fixo de "play" para visual
+                  icon: const Icon(Icons.play_arrow),
                   iconSize: 48,
-                  onPressed: () {},
+                  onPressed: () async {
+                    await _incrementPlayCount();
+                  },
                 ),
                 IconButton(
                   icon: const Icon(Icons.skip_next),
