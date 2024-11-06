@@ -37,15 +37,15 @@ class AutenticacaoServico {
   }
 
   // Login do usuário.
-  Future<void> logarUsuario(String email, String senha) async {
+  Future<String?> logarUsuario({required String email, required String senha}) async {
     try {
-      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: senha);
-      // Salva o horário de login no Firestore
-      await _firestore.collection('usuarios').doc(userCredential.user!.uid).update({
-        'loginTime': DateTime.now().toIso8601String(),
-      });
-    } catch (e) {
-      print('Erro ao fazer login: $e');
+      await _firebaseAuth.signInWithEmailAndPassword(email: email, password: senha);
+      
+      // Inicia o contador de tempo de uso ao fazer login
+      await _tempoUsoServico.iniciarContador();
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return e.message;
     }
   }
 
