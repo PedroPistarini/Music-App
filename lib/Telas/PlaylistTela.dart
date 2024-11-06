@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Telas/PerfilTela.dart';
 import 'package:flutter_application_1/Telas/detalhesplaylisttela.dart';
 import 'package:flutter_application_1/Telas/musicatela.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -86,27 +87,50 @@ class _PlaylistTelaState extends State<PlaylistTela> {
         ],
       ),
       drawer: Drawer(
-        child: ListView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            ListTile(
-              leading: const Icon(Icons.music_note),
-              title: const Text("Músicas"),
-              onTap: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const Musicatela()));
-              },
+            // Parte superior do Drawer com outros itens
+            ListView(
+              shrinkWrap: true,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.music_note),
+                  title: const Text("Músicas"),
+                  onTap: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const Musicatela()));
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text("Deslogar"),
-              onTap: () async {
-                await _authService.deslogar();
-                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-              },
+
+            // Parte inferior com "Deslogar" e "Perfil"
+            Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.person),
+                  title: const Text("Perfil"),
+                  onTap: () async {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => Perfiltela()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text("Deslogar"),
+                  onTap: () async {
+                    await _authService.deslogar();
+                    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                  },
+                ),
+              ],
             ),
           ],
         ),
       ),
+
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
